@@ -1,10 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const categoryRouter = require("./Category/categoryRouter.js"); //done
-const userRouter = require("./User/userRouter.js"); //done
-const productRouter = require("./Products/productRoutes.js"); //done
-const brandRouter = require("./Brands/brandRoutes.js"); //done
+const categoryRouter = require("./API/Category/categoryRouter.js"); //done
+const userRouter = require("./API/User/userRouter.js"); //done
+const productRouter = require("./API/Products/productRoutes.js"); //done
+const brandRouter = require("./API/Brands/brandRoutes.js"); //done
 
 const app = express();
 app.use(express.json());
