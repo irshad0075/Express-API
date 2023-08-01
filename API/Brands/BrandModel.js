@@ -1,24 +1,21 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require ('mongoose');
 
 const BrandSchema = new Schema({
-  brandname: {
+  Name: {
     type: String,
     unique: true,
     required: true,
  
   },
-  description: {
+  Description: {
     type: String,
     required: true,
   },
-  logo: {
+  LogoUrl: {
     type: String,
     required: true,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+ 
 });
 
 const Brand = model('Brand', BrandSchema);
