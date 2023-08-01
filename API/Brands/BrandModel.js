@@ -1,3 +1,4 @@
+// BrandModel.js
 const { Schema, model } = require('mongoose');
 
 const BrandSchema = new Schema({
@@ -10,11 +11,11 @@ const BrandSchema = new Schema({
   },
   Description: {
     type: String,
-    required: false, // We can set this to true if Description is required
+    required: true,
   },
   LogoUrl: {
     type: String,
-    required: true, // We can set this to false if LogoUrl is not required
+    required: true,
   },
   CreatedAt: {
     type: Date,
