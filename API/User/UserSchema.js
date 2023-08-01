@@ -19,6 +19,11 @@ const UserSchema = new Schema(
     profilePic: {
       type: String,
     },
+     role: {
+      type: String,
+      required: true,
+      default: "user",
+    },
   },
   { timestamps: true }
 );

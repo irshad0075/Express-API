@@ -9,10 +9,15 @@ const brandRouter = require("./API/Brands/brandRoutes.js"); //done
 const app = express();
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Set up MongoDB connection
+mongoose.connect(process.env.MONGO_URI);
+// Handle connection errors
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err.message);
+});
+// Handle successful connection
+mongoose.connection.once("open", () => {
+  console.log("DB Connected Successfully");
 });
 
 // Categories Routes
@@ -33,7 +38,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Something went wrong." });
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+const SERVER_PORT = process.env.SERVER_PORT;
+app.listen(SERVER_PORT, () => {
+  console.log(`Server is running on SERVER_PORT ${SERVER_PORT}`);
 });
+

@@ -2,16 +2,10 @@ const Product = require("./ProductModel");
 const { connect } = require("mongoose");
 require("dotenv").config();
 
+// here we are going to create Products
 const createProduct = async (req, res) => {
-  const {
-    name,
-    price,
-    category,
-    brand,
-    thumbnail,
-    imageArray,
-    description,
-  } = req.body;
+  const { name, price, category, brand, thumbnail, imageArray, description } =
+    req.body;
 
   try {
     await connect(process.env.MONGO_URI);
@@ -30,6 +24,7 @@ const createProduct = async (req, res) => {
   }
 };
 
+//here we get products by brands
 const getProductsByBrand = async (req, res) => {
   const { brand } = req.query;
 
@@ -56,29 +51,14 @@ const getProductsByCategory = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   const { productId } = req.params;
-  const {
-    name,
-    price,
-    category,
-    brand,
-    thumbnail,
-    imageArray,
-    description,
-  } = req.body;
+  const { name, price, category, brand, thumbnail, imageArray, description } =
+    req.body;
 
   try {
     await connect(process.env.MONGO_URI);
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
-      {
-        name,
-        price,
-        category,
-        brand,
-        thumbnail,
-        imageArray,
-        description,
-      },
+      { name, price, category, brand, thumbnail, imageArray, description },
       { new: true }
     );
     if (!updatedProduct) {

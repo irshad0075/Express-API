@@ -2,38 +2,41 @@ const Brand = require('./BrandModel');
 const { connect } = require('mongoose');
 require('dotenv').config();
 
+
 const createBrand = async (req, res) => {
-    const { Name } = req.body;
-
-    if (!Name) {
-        res.status(403).json({
-            message: "Missing Required Field"
-        });
+    const { name } = req.body; // Use lowercase "name" instead of "Name"
+  
+    if (!name) {
+      res.status(403).json({
+        message: "Missing Required Field",
+      });
     } else {
-        try {
-            await connect(process.env.MONGO_URI);
-            const checkExisting = await Brand.exists({ Name });
-
-            if (checkExisting) {
-                res.status(400).json({
-                    message: "Brand Already Exists"
-                });
-            } else {
-                await Brand.create({ Name });
-                const allBrands = await Brand.find();
-
-                res.json({
-                    message: "Brand Created Successfully",
-                    brands: allBrands
-                });
-            }
-        } catch (error) {
-            res.status(400).json({
-                message: error.message
-            });
+      try {
+        await connect(process.env.MONGO_URI);
+        const checkExisting = await Brand.exists({ Name: name }); // Use uppercase "Name"
+  
+        if (checkExisting) {
+          res.status(400).json({
+            message: "Brand Already Exists",
+          });
+        } else {
+          await Brand.create({ Name: name }); // Use uppercase "Name"
+          const allBrands = await Brand.find();
+  
+          res.json({
+            message: "Brand Created Successfully",
+            brands: allBrands,
+          });
         }
+      } catch (error) {
+        res.status(400).json({
+           
+          message: error.message,
+        });
+      }
     }
-};
+  };
+  
 
 const getBrandByName = async (req, res) => {
     const { name } = req.query;
