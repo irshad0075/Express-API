@@ -1,3 +1,4 @@
+
 const Brand = require('./BrandModel');
 const { connect } = require('mongoose');
 require('dotenv').config();
@@ -29,8 +30,9 @@ const createBrand = async (req, res) => {
         });
       }
     } catch (error) {
-      console.error("Error during Brand creation:", error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(400).json({
+        message: error.message,
+      });
     }
   }
 };
@@ -43,8 +45,9 @@ const getBrandByName = async (req, res) => {
     const brand = await Brand.findOne({ Name: name });
     res.json({ brand });
   } catch (error) {
-    console.error("Error fetching brand by name:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
@@ -53,21 +56,27 @@ const getBrandByID = async (req, res) => {
 
   try {
     await connect(process.env.MONGO_URI);
-    const brand = await Brand.findById(_id);
-
+    const brand = await Brand.findOne({ _id })
     if (!brand) {
       return res.status(404).json({ message: "Brand not found" });
     }
 
+    else {
+      res.json({
+        brand     
+      })
+  }
     res.json({ brand });
   } catch (error) {
-    console.error("Error fetching Brand by ID:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({
+      message: "Internal server error"
+    });
   }
 };
 
 const updateBrand = async (req, res) => {
-  const { _id, Name, Description, LogoUrl } = req.body;
+
+  const { _id , Name, Description, LogoUrl } = req.body;
 
   try {
     await connect(process.env.MONGO_URI);
@@ -76,37 +85,31 @@ const updateBrand = async (req, res) => {
       { Name, Description, LogoUrl },
       { new: true }
     );
-
     if (!updatedBrand) {
       return res.status(404).json({ message: "Brand not found" });
     }
-
     res.json({ brand: updatedBrand });
   } catch (error) {
-    console.error("Error updating brand:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
 const deleteBrand = async (req, res) => {
-  const { _id } = req.params;
+  const {  _id  } = req.params;
 
   try {
     await connect(process.env.MONGO_URI);
-    const deletedBrand = await Brand.findByIdAndDelete(_id);
-
+    const deletedBrand = await Brand.findByIdAndDelete( _id );
     if (!deletedBrand) {
       return res.status(404).json({ message: "Brand not found" });
     }
-
-    const brands = await Brand.find();
-    res.json({
-      message: "Brand Deleted Successfully",
-      brands,
-    });
+    res.json({ message: "Brand deleted successfully" });
   } catch (error) {
-    console.error("Error deleting brand:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({
+      message: error.message,
+    });
   }
 };
 

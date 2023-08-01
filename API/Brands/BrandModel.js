@@ -1,23 +1,21 @@
-// BrandModel.js
 const { Schema, model } = require('mongoose');
 
 const BrandSchema = new Schema({
-  Name: {
+  brandname: {
     type: String,
     unique: true,
     required: true,
-    minlength: 2,
-    maxlength: 100,
+ 
   },
-  Description: {
+  description: {
     type: String,
     required: true,
   },
-  LogoUrl: {
+  logo: {
     type: String,
     required: true,
   },
-  CreatedAt: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },

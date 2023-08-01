@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const {
   createBrand,
   getBrandByName,
@@ -10,8 +9,8 @@ const {
 } = require("./brandController.js");
 
 router.post("/createBrand", createBrand);
-router.get("/getbrandByName", getBrandByName);
-router.get("/getbrandByID/:brandId", getBrandByID);
+router.get("/brandByName", getBrandByName);
+router.get("/brandByID/:brandId", getBrandByID);
 router.put("/updateBrand/:brandId", updateBrand);
 router.delete("/deleteBrand/:brandId", deleteBrand);
 
