@@ -1,22 +1,16 @@
-const { Schema, model } = require ('mongoose');
+const { Schema, model } = require('mongoose')
 
-const BrandSchema = new Schema({
-  Name: {
+const brandSchema = new Schema({
+  BrandName: {
     type: String,
+    required: true,
     unique: true,
-    required: true,
- 
   },
-  Description: {
+  BrandImage: {
     type: String,
-    required: true,
-  },
-  LogoUrl: {
-    type: String,
-    required: true,
-  },
- 
+    required: true
+  }
 });
 
-const Brand = model('Brand', BrandSchema);
+const Brand = model("Brand", brandSchema);
 module.exports = Brand;

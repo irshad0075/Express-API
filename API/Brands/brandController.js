@@ -3,11 +3,10 @@ const { connect } = require('mongoose');
 require('dotenv').config();
 
 const createBrand = async (req, res) => {
-  const { Name, Description, LogoUrl } = req.body;
-  console.log('Creating brand:', Name, Description, LogoUrl);
+  const { BrandName, BrandImage } = req.body;
+  console.log('Creating brand:', BrandName, BrandImage);
 
-
-  if (!Name || !Description || !LogoUrl) {
+  if (!BrandName || !BrandImage) {
     return res.status(400).json({
       message: "Missing Required Field",
     });
@@ -16,7 +15,7 @@ const createBrand = async (req, res) => {
   try {
     await connect(process.env.MONGO_URI);
     console.log("DB Connected");
-    const checkExisting = await Brand.exists({ Name });
+    const checkExisting = await Brand.exists({ BrandName });
 
     if (checkExisting) {
       return res.status(400).json({
@@ -24,7 +23,7 @@ const createBrand = async (req, res) => {
       });
     }
 
-    await Brand.create({ Name, Description, LogoUrl });
+    await Brand.create({ BrandName, BrandImage });
     const allBrands = await Brand.find();
 
     res.status(201).json({
@@ -32,95 +31,86 @@ const createBrand = async (req, res) => {
       brands: allBrands,
     });
   } catch (error) {
-    res.status(400).json({
-      message: error.message,
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };
 
-const getBrandByName = async (req, res) => {
-  const { name } = req.query;
+const getAllBrands = async (req, res) => {
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const brand = await Brand.findOne({ Name: name });
-    res.json({ brand });
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-};
+    try {
+        await connect(process.env.MONGO_URI)
+        const allBrands = await Brand.find()
+        res.json({
+            category: allBrands
+        })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
 const getBrandByID = async (req, res) => {
-  const { _id } = req.params; // Assuming you will pass _id as a URL parameter
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const brand = await Brand.findById(_id);
-
-    if (!brand) {
-      return res.status(404).json({ message: "Brand not found" });
+    const { _id } = req.query
+    try {
+        await connect(process.env.MONGO_URI)
+        const  brand = await Brand.findOne({ _id })
+        res.json({  brand })
     }
-
-    res.json({ brand });
-  } catch (error) {
-    res.status(400).json({
-      message: "Internal server error",
-    });
-  }
-};
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
 const updateBrand = async (req, res) => {
-  const { _id, Name, Description, LogoUrl } = req.body;
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const updatedBrand = await Brand.findByIdAndUpdate(
-      _id,
-      { Name, Description, LogoUrl },
-      { new: true }
-    );
+    const { _id,  BrandName,  BrandImage } = req.body
 
-    if (!updatedBrand) {
-      return res.status(404).json({ message: "Brand not found" });
+    const filter = { _id };
+    const update = {  BrandName,  BrandImage };
+
+    try {
+        await connect(process.env.MONGO_URI)
+        await Brand.findOneAndUpdate(filter, update, {
+            new: true
+        });
+        const  brand = await  Brand.find()
+        res.json({
+            message: "Success",
+             brand
+        })
     }
-
-    res.json({ brand: updatedBrand });
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-};
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
 const deleteBrand = async (req, res) => {
-  const { _id } = req.params;
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const deletedBrand = await Brand.findByIdAndDelete(_id);
-
-    if (!deletedBrand) {
-      return res.status(404).json({ message: "Brand not found" });
+    const { _id } = req.body
+    try {
+        await connect(process.env.MONGO_URI)
+        await Brand.deleteOne({ _id })
+        const brand = await Brand.find()
+        res.status(200).json({
+            message: "Deleted Successfully",
+            brand
+        })
     }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
-    const brands = await Brand.find();
-    res.json({
-      message: "Brand Deleted Successfully",
-      brands,
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-};
-
-module.exports = {
-  createBrand,
-  getBrandByName,
-  getBrandByID,
-  updateBrand,
-  deleteBrand,
-};
+module.exports = {createBrand , getAllBrands , getBrandByID , updateBrand , deleteBrand }

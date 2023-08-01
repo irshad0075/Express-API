@@ -1,7 +1,12 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model } = require('mongoose')
 
-const ProductSchema = new Schema({
-  name: {
+
+const productSchema = new Schema({
+  ProductName: {
+    type: String,
+    required: true,
+  },
+  description: {
     type: String,
     required: true,
   },
@@ -10,12 +15,14 @@ const ProductSchema = new Schema({
     required: true,
   },
   category: {
-    type: String,
-    required: true,
+    type: Schema.Types.ObjectId,
+    ref: "Category",
+    required: true, 
   },
   brand: {
-    type: String,
-    required: true,
+    type: Schema.Types.ObjectId,
+    ref: "Brand",
+    required: true, 
   },
   thumbnail: {
     type: String,
@@ -25,11 +32,8 @@ const ProductSchema = new Schema({
     type: [String],
     required: true,
   },
-  description: {
-    type: String,
-    required: true,
-  },
 });
 
-const Product = model("Product", ProductSchema);
+const Product = model("Product", productSchema);
+
 module.exports = Product;

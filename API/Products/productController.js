@@ -1,94 +1,161 @@
-const Product = require("./ProductModel");
-const { connect } = require("mongoose");
-require("dotenv").config();
+const Product = require('./productModel')
+const {connect} = require('mongoose')
+require('dotenv').config()
 
-// here we are going to create Products
+
 const createProduct = async (req, res) => {
-  const { name, price, category, brand, thumbnail, imageArray, description } =
-    req.body;
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const newProduct = await Product.create({
-      name,
-      price,
-      category,
-      brand,
-      thumbnail,
-      imageArray,
-      description,
-    });
-    res.status(201).json({ product: newProduct });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const { ProductName, description, price, category, brand, thumbnail, imageArray } = req.body
 
-//here we get products by brands
-const getProductsByBrand = async (req, res) => {
-  const { brand } = req.query;
+    if (!ProductName || !description || !price || !category || !brand || !thumbnail || !imageArray) {
+        res.status(403).json({
+            message: "Missing Required Field"
+        })
+    }
+    else {
+        try {
+            await connect(process.env.MONGO_URI)
+            const checkExistingProduct  = await Product.exists({ ProductName  })
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const products = await Product.find({ brand });
-    res.json({ products });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+            if (checkExistingProduct ) {
+                res.status(400).json({
+                    message: "Product  Already Exists"
+                })
+            }
+            else {
+                await Product.create({ ProductName, description, price, category, brand, thumbnail, imageArray})
+                const allProducts  = await Product.find()
 
-const getProductsByCategory = async (req, res) => {
-  const { category } = req.query;
+                res.json({
+                    message: "Product created",
+                    products: allProducts 
+                })
+            }}
+        catch (error) {
+            res.status(400).json({
+                message: error.message
+            })
+        }}
+}
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const products = await Product.find({ category });
-    res.json({ products });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+const getProductByBrand = async (req, res) => {
+
+    const { brand } = req.query
+    try {
+        await connect(process.env.MONGO_URI)
+        const products = await Product.findOne({ brand })
+        res.json({ products })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
+const getProductByName = async (req, res) => {
+
+    const { ProductName } = req.query;
+    try {
+        await connect(process.env.MONGO_URI);
+        const products = await Product.findOne({ ProductName });
+        
+        res.json({ products });
+    } catch (error) {
+        res.status(400).json({
+            message: error.message
+        });
+    }
+}
+
+const getProductById = async (req, res) => {
+
+    const { _id } = req.query
+    try {
+        await connect(process.env.MONGO_URI)
+        const products = await Product.findOne({ _id })
+        res.json({ products })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
+const getAllProduct = async (req, res) => {
+
+    try {
+        await connect(process.env.MONGO_URI)
+        const allProduct = await Product.find()
+        res.json({
+            products: allProduct
+        })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
+const getProductByCategory = async (req, res) => {
+
+    const { category } = req.query
+    try {
+        await connect(process.env.MONGO_URI)
+        const products = await Product.findOne({ category })
+        res.json({ products })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
 const updateProduct = async (req, res) => {
-  const { productId } = req.params;
-  const { name, price, category, brand, thumbnail, imageArray, description } =
-    req.body;
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      { name, price, category, brand, thumbnail, imageArray, description },
-      { new: true }
-    );
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+    const { _id, ProductName, description, price, category, brand, thumbnail, imageArray } = req.body
+
+    const filter = { _id };
+    const update = { ProductName, description, price, category, brand, thumbnail, imageArray };
+
+    try {
+        await connect(process.env.MONGO_URI)
+        await Product.findOneAndUpdate(filter, update, {
+            new: true
+        });
+        const products = await Product.find()
+        res.json({
+            message: "Success",
+            products
+        })
     }
-    res.json({ product: updatedProduct });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
 const deleteProduct = async (req, res) => {
-  const { productId } = req.params;
 
-  try {
-    await connect(process.env.MONGO_URI);
-    const deletedProduct = await Product.findByIdAndDelete(productId);
-    if (!deletedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+    const { _id } = req.body
+    try {
+        await connect(process.env.MONGO_URI)
+        await Product.deleteOne({ _id })
+        const products = await Product.find()
+        res.status(200).json({
+            message: "Deleted Successfully",
+            products
+        })
     }
-    res.json({ message: "Product deleted successfully" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
-module.exports = {
-  createProduct,
-  getProductsByBrand,
-  getProductsByCategory,
-  updateProduct,
-  deleteProduct,
-};
+module.exports = { createProduct, getProductByBrand, getAllProduct, getProductByName, getProductById, getProductByCategory, updateProduct, deleteProduct }

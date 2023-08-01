@@ -1,83 +1,118 @@
-const { connect } = require("mongoose");
-require("dotenv").config();
-const Category = require("./Model.js");
+const Category = require('./Model');
+const {connect} = require('mongoose')
+require('dotenv').config()
 
-// Get all categories
+
 const getAllCategories = async (req, res) => {
-  try {
-    const allCategories = await Category.find();
-    res.json(allCategories);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
 
-// Get category by ID
-const getCategoryById = async (req, res) => {
-  const { categoryId } = req.params;
-  try {
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      return res.status(404).json({ message: "Category not found." });
+    try {
+        await connect(process.env.MONGO_URI)
+        const allCategories = await Category.find()
+        res.json({
+            category: allCategories
+        })
     }
-    res.json(category);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
 
-// Create a new category
+const getCategoryByID = async (req, res) => {
+
+    const { _id } = req.query
+    try {
+        await connect(process.env.MONGO_URI)
+        const category = await Category.findOne({ _id })
+        res.json({ category })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
 const createCategory = async (req, res) => {
-  const { categoryName, categoryImage } = req.body;
-  try {
-    const checkExisting = await Category.exists({ categoryName });
-    if (checkExisting) {
-      return res.status(400).json({ message: "Category already exists." });
-    }
-    const newCategory = await Category.create({ categoryName, categoryImage });
-    res.status(201).json(newCategory);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const { CategoryName, CategoryImage } = req.body
 
-// Update a category
+    if (!CategoryName || !CategoryImage) {
+        res.status(403).json({
+            message: "Missing Required Field"
+        })
+    }
+    else {
+        try {
+            await connect(process.env.MONGO_URI)
+            const checkExisting = await Category.exists({ CategoryName })
+
+            if (checkExisting) {
+                res.status(400).json({
+                    message: "Category Already Exists"
+                })
+            }
+            else {
+                await Category.create({ CategoryName, CategoryImage })
+                const allCategories = await Category.find()
+
+                res.json({
+                    message: "DB Connected",
+                    category: allCategories
+                })
+            }
+        }
+
+
+        catch (error) {
+            res.status(400).json({
+                message: error.message
+            })
+        }
+    }
+}
+
 const updateCategory = async (req, res) => {
-  const { categoryId } = req.params;
-  const { categoryName, categoryImage } = req.body;
-  try {
-    const updatedCategory = await Category.findByIdAndUpdate(
-      categoryId,
-      { categoryName, categoryImage },
-      { new: true }
-    );
-    if (!updatedCategory) {
-      return res.status(404).json({ message: "Category not found." });
-    }
-    res.json(updatedCategory);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const { _id, CategoryName, CategoryImage } = req.body
 
-// Delete a category
+    const filter = { _id };
+    const update = { CategoryName, CategoryImage };
+
+    try {
+        await connect(process.env.MONGO_URI)
+        await Category.findOneAndUpdate(filter, update, {
+            new: true
+        });
+        const category = await Category.find()
+        res.json({
+            message: "Success",
+            category
+        })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
 const deleteCategory = async (req, res) => {
-  const { categoryId } = req.params;
-  try {
-    const deletedCategory = await Category.findByIdAndDelete(categoryId);
-    if (!deletedCategory) {
-      return res.status(404).json({ message: "Category not found." });
-    }
-    res.json({ message: "Category deleted successfully." });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
 
-module.exports = {
-  getAllCategories,
-  getCategoryById,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-};
+    const { _id } = req.body
+    try {
+        await connect(process.env.MONGO_URI)
+        await Category.deleteOne({ _id })
+        const category = await Category.find()
+        res.status(200).json({
+            message: "Deleted Successfully",
+            category
+        })
+    }
+    catch (error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
+module.exports = { getAllCategories, getCategoryByID , createCategory , updateCategory , deleteCategory }
